@@ -23,7 +23,7 @@ function loadAladin(coord) {
 	fetch('https://pg.vrana.cz/aladin/get_data.php?latitude=' + coord.lat + '&longitude=' + coord.lon).then(response => response.json()).then(data => {
 		aladin = data;
 		updateAladin();
-	});
+	}, () => document.getElementById('aladin-forecast').innerHTML = 'Pro vybrané místo není předpověď.');
 }
 
 function updateAladin() {
@@ -51,7 +51,7 @@ function updateAladin() {
 			aladinTime.setHours(aladinTime.getHours() + 1);
 		}
 	}
-	div.innerHTML = 'Není předpověď.';
+	div.innerHTML = 'Pro vybraný čas není předpověď.';
 }
 </script>
 </plugin>

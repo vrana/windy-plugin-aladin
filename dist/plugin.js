@@ -22,7 +22,7 @@ W.loadPlugin(
 /* Mounting options */
 {
   "name": "windy-plugin-aladin",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "author": "Jakub Vrana",
   "repository": {
     "type": "git",
@@ -59,6 +59,8 @@ function () {
     }).then(function (data) {
       aladin = data;
       updateAladin();
+    }, function () {
+      return document.getElementById('aladin-forecast').innerHTML = 'Pro vybrané místo není předpověď.';
     });
   }
 
@@ -99,6 +101,6 @@ function () {
       }
     }
 
-    div.innerHTML = 'Není předpověď.';
+    div.innerHTML = 'Pro vybraný čas není předpověď.';
   }
 });
