@@ -1,6 +1,57 @@
 <plugin>
+<div class="plugin-content">
+<h2>Aladin</h2>
+
+<div id="aladin-forecast">Otevřete picker.</div>
+
+<p>Zdroj dat: <a href="https://aladinonline.androworks.org/" target="_blank">Aladin</a></p>
+</div>
+
 <script>
-this.onopen = () => {
-};
+import picker from '@windy/picker';
+import store from '@windy/store';
+
+let aladin;
+
+picker.on('pickerOpened', loadAladin);
+picker.on('pickerMoved', loadAladin);
+picker.on('pickerClosed', () => document.getElementById('aladin-forecast').innerHTML = 'Otevřete picker.');
+store.on('timestamp', updateAladin);
+
+function loadAladin(coord) {
+	aladin = undefined;
+	fetch('https://pg.vrana.cz/aladin/get_data.php?latitude=' + coord.lat + '&longitude=' + coord.lon).then(response => response.json()).then(data => {
+		aladin = data;
+		updateAladin();
+	});
+}
+
+function updateAladin() {
+	if (!aladin) {
+		return;
+	}
+	const div = document.getElementById('aladin-forecast');
+	const windyTime = new Date(store.get('timestamp'));
+	const aladinTime = new Date(aladin.forecastTimeIso);
+	if (windyTime >= aladinTime) {
+		for (let i = 0; i < aladin.parameterValues.WIND_SPEED.length; i++) {
+			if (aladinTime >= windyTime) {
+				const values = {};
+				Object.entries(aladin.parameterValues).forEach(([key, value]) => values[key] = value[i]);
+				console.log(values);
+				div.innerHTML = '<table>'
+					+ '<tr><td>Vítr:<td><b>' + (Math.round(values.WIND_SPEED * 10) / 10) + ' m/s</b>'
+					+ '<tr><td>Nárazy:<td><b>' + (Math.round(values.WIND_GUST_SPEED * 10) / 10) + ' m/s</b>'
+					+ '<tr><td>Směr:<td><span style="display: inline-block; transform: rotate(' + values.WIND_DIRECTION + 'deg)">↑</span> <b>' + Math.round((values.WIND_DIRECTION + 180) % 360) + '°</b>'
+					+ '<tr><td>Teplota:<td><b>' + Math.round(values.TEMPERATURE) + ' °C</b>'
+					+ '<tr><td>Srážky:<td><b>' + Math.round(values.PRECIPITATION_TOTAL) + ' mm/h</b>'
+					+ '</table>';
+				return;
+			}
+			aladinTime.setHours(aladinTime.getHours() + 1);
+		}
+	}
+	div.innerHTML = 'Není předpověď.';
+}
 </script>
 </plugin>

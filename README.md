@@ -1,5 +1,5 @@
-### Windy plugin for Flymet
+### Windy plugin for Aladin
 
-Navigate to https://www.windy.com/plugins, click _Load plugin directlly from npm_, type `windy-plugin-flymet` and click _Load & activate_.
+Navigate to https://www.windy.com/plugins, click _Load plugin directlly from npm_, type `windy-plugin-aladin` and click _Load & activate_.
 
-Data source: http://flymet.info/
+Data source: https://aladinonline.androworks.org/
