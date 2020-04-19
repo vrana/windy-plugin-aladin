@@ -22,54 +22,61 @@ W.loadPlugin(
 /* Mounting options */
 {
   "name": "windy-plugin-aladin",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": "Jakub Vrana",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/vrana/windy-plugin-aladin"
   },
   "description": "Windy plugin for Aladin.",
-  "displayName": "Aladin",
-  "hook": "menu",
-  "className": "plugin-lhpane plugin-mobile-fullscreen",
-  "exclusive": "lhpane"
+  "displayName": "Aladin"
 },
 /* HTML */
-'<div class="plugin-content"> <h2>Aladin</h2> <div id="aladin-forecast">Otevřete picker.</div> <p>Zdroj dat: <a href="https://aladinonline.androworks.org/" target="_blank">Aladin</a></p> </div>',
+'',
 /* CSS */
-'.onwindy-plugin-aladin .left-border{left:400px}.onwindy-plugin-aladin #search{display:none}#windy-plugin-aladin{width:400px;height:100%}#windy-plugin-aladin .plugin-content{padding:20px 15px 15px 15px;font-size:14px;line-height:1.6}#windy-plugin-aladin a{color:navy}#windy-plugin-aladin td{text-align:left;padding-right:5px}',
+'',
 /* Constructor */
 function () {
+  var $ = W.require('$');
+
   var store = W.require('store');
 
   var picker = W.require('picker');
 
   var aladin;
+  var aladinDiv;
   picker.on('pickerOpened', loadAladin);
   picker.on('pickerMoved', loadAladin);
-  picker.on('pickerClosed', function () {
-    return document.getElementById('aladin-forecast').innerHTML = 'Otevřete picker.';
-  });
   store.on('timestamp', updateAladin);
+  store.on('overlay', updateAladin);
 
   function loadAladin(coord) {
     aladin = undefined;
+    updateAladin();
     fetch('https://pg.vrana.cz/aladin/get_data.php?latitude=' + coord.lat + '&longitude=' + coord.lon).then(function (response) {
       return response.json();
     }).then(function (data) {
       aladin = data;
       updateAladin();
     }, function () {
-      return document.getElementById('aladin-forecast').innerHTML = 'Pro vybrané místo není předpověď.';
+      return updateAladin('Neplatné místo.');
     });
   }
 
-  function updateAladin() {
+  function updateAladin(error) {
+    if (!aladinDiv) {
+      var _picker = document.querySelector('.picker-content');
+
+      aladinDiv = document.createElement('div');
+
+      _picker.appendChild(aladinDiv);
+    }
+
     if (!aladin) {
+      aladinDiv.innerHTML = error || 'Nahrávám.';
       return;
     }
 
-    var div = document.getElementById('aladin-forecast');
     var windyTime = new Date(store.get('timestamp'));
     var aladinTime = new Date(aladin.forecastTimeIso);
 
@@ -84,8 +91,52 @@ function () {
 
             return values[key] = value[i];
           });
-          console.log(values);
-          div.innerHTML = '<table>' + '<tr><td>Vítr:<td><b>' + Math.round(values.WIND_SPEED * 10) / 10 + ' m/s</b>' + '<tr><td>Nárazy:<td><b>' + Math.round(values.WIND_GUST_SPEED * 10) / 10 + ' m/s</b>' + '<tr><td>Směr:<td><span style="display: inline-block; transform: rotate(' + values.WIND_DIRECTION + 'deg)">↑</span> <b>' + Math.round((values.WIND_DIRECTION + 180) % 360) + '°</b>' + '<tr><td>Teplota:<td><b>' + Math.round(values.TEMPERATURE) + ' °C</b>' + '<tr><td>Srážky:<td><b>' + Math.round(values.PRECIPITATION_TOTAL) + ' mm/h</b>' + '</table>';
+          var content = '';
+
+          switch (store.get('overlay')) {
+            case 'wind':
+              var dir = Math.round((values.WIND_DIRECTION + 180) % 360);
+              content = '<i><div class="iconfont" style="transform: rotate(' + dir + 'deg)">"</div>' + dir + '°</i> ' + Math.round(values.WIND_SPEED) + 'm/s';
+              break;
+
+            case 'gust':
+              content = Math.round(values.WIND_GUST_SPEED) + 'm/s';
+              break;
+
+            case 'temp':
+              content = Math.round(values.TEMPERATURE) + '°C';
+              break;
+
+            case 'pressure':
+              content = Math.round(values.PRESSURE / 100) + 'hPa';
+              break;
+
+            case 'rain':
+              content = Math.round(values.PRECIPITATION_TOTAL) + 'mm';
+              break;
+
+            case 'rh':
+              content = Math.round(100 * values.HUMIDITY) + '%';
+              break;
+
+            case 'clouds':
+              content = Math.round(100 * values.CLOUDS_TOTAL) + '%';
+              break;
+
+            case 'lclouds':
+              content = Math.round(100 * values.CLOUDS_LOW) + '%';
+              break;
+
+            case 'mclouds':
+              content = Math.round(100 * values.CLOUDS_MEDIUM) + '%';
+              break;
+
+            case 'hclouds':
+              content = Math.round(100 * values.CLOUDS_HIGH) + '%';
+              break;
+          }
+
+          aladinDiv.innerHTML = '<span><big title="Aladin">' + content + '</big></span>';
           return {
             v: void 0
           };
@@ -101,6 +152,6 @@ function () {
       }
     }
 
-    div.innerHTML = 'Pro vybraný čas není předpověď.';
+    aladinDiv.innerHTML = 'Neplatný čas.';
   }
 });
