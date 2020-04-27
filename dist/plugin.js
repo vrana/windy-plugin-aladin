@@ -22,7 +22,7 @@ W.loadPlugin(
 /* Mounting options */
 {
   "name": "windy-plugin-aladin",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "author": "Jakub Vrana",
   "repository": {
     "type": "git",
@@ -96,11 +96,11 @@ function () {
           switch (store.get('overlay')) {
             case 'wind':
               var dir = Math.round((values.WIND_DIRECTION + 180) % 360);
-              content = '<i><div class="iconfont" style="transform: rotate(' + dir + 'deg)">"</div>' + dir + '°</i> ' + Math.round(values.WIND_SPEED) + 'm/s';
+              content = '<i><div class="iconfont" style="transform: rotate(' + dir + 'deg)">"</div>' + dir + '°</i> ' + values.WIND_SPEED.toFixed(1) + ' m/s';
               break;
 
             case 'gust':
-              content = Math.round(values.WIND_GUST_SPEED) + 'm/s';
+              content = values.WIND_GUST_SPEED.toFixed(1) + ' m/s';
               break;
 
             case 'temp':
