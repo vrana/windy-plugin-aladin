@@ -1,6 +1,6 @@
 {
     "name": "windy-plugin-aladin",
-    "version": "0.3.1",
+    "version": "0.3.2",
     "description": "Windy plugin for Aladin.",
     "main": "dist/plugin.js",
     "scripts": {

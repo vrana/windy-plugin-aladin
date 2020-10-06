@@ -23,10 +23,9 @@ function loadAladin(coord) {
 
 function updateAladin(error) {
 	if (!aladinDiv) {
-		const picker = document.querySelector('.picker-content');
 		aladinDiv = document.createElement('div');
-		picker.appendChild(aladinDiv);
 	}
+	document.querySelector('.picker-content').appendChild(aladinDiv);
 	if (!aladin) {
 		aladinDiv.innerHTML = error || 'Nahrávám.';
 		return;
