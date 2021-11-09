@@ -1,5 +1,7 @@
 ### Windy plugin for Aladin
 
-Navigate to https://www.windy.com/plugins, click _Load plugin directlly from npm_, type `windy-plugin-aladin` and click _Load & activate_.
+**The data source died and the plugin doesn't work anymore.**
+
+Navigate to https://www.windy.com/plugins/windy-plugin-aladin?iconEu,50.035,13.710,9 and click _Open_.
 
 Data source: https://aladinonline.androworks.org/
